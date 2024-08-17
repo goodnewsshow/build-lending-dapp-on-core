@@ -90,21 +90,30 @@ contract CoreLoanPlatform is Ownable {
       return userCollateral[user];
     }    
 
-    function depositBTC(uint256 amount) external  {
-      // TODO : Implement Logic for deposting BTC
-    }
+    function depositBTC(uint256 amount) external {
+	  require(amount > 0, "Amount must be greater than 0");
+	  BTC.safeTransferFrom(msg.sender, address(this), amount);
+	  lenderBalances[msg.sender] += amount;
+	  totalStaked = totalStaked + amount;
+	  emit BTCDeposited(msg.sender, amount);
+}
 
-    function withdrawBTC(uint256 amount) external  {
-      // TODO : Implement Logic for withdrawing BTC
-    }
+    function withdrawBTC(uint256 amount) external {
+	  require(amount > 0, "Amount must be greater than 0");
+	  require(lenderBalances[msg.sender] >= amount, "Insufficient balance");
+	  lenderBalances[msg.sender] -= amount;
+	  totalStaked = totalStaked - amount;
+	  BTC.safeTransfer(msg.sender, amount);
+	  emit BTCWithdrawn(msg.sender, amount);
+}
 
     function getUserStaked(address user) external view returns (uint256) {
-      // TODO : Implement Logic for fetching a User's Staked amount
-    }
+	  return lenderBalances[user];
+}
 
     function getCurrentApy() external pure returns (uint256) {
-      // TODO : Implement Logic for fetching current APY
-    }
+	  return INTEREST_RATE;
+}
 
     function repayLoan(address user) external  {
       // TODO : Implement Logic for repaying Loan
